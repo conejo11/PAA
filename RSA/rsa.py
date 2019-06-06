@@ -56,7 +56,7 @@ def criptografa(mensagem, e, n):
 def descriptografa(mensagem, d, n):
     decript = []
     for i in mensagem:
-        decript.append(chr(int(pow(i, d, n)%256)))
+        decript.append(pow(i, d, n))
 
     return decript
 
