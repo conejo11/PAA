@@ -6,8 +6,11 @@ def extendedEuclidean(a, b):
 		return (b, 0, 1)
 	else:
 		gcd, x, y = extendedEuclidean(b % a, a)
-		return (int(gcd), int(y - (b/a) * x), int(x))
+		return (gcd, y - b//a * x, x)
 
+################################################################################
+################################################################################
+################################################################################
 def fermatPrimalityTest(n):
     if n > 1:
         for t in range(50):
@@ -24,7 +27,7 @@ def geraPrimo(bits):
         n = n+1
 
     while not fermatPrimalityTest(n):
-        print(n)
+        # print(n)
         n += 2
 
     return n
@@ -33,18 +36,20 @@ def chavePublica(bits):
     p = geraPrimo(bits)
     q = geraPrimo(bits)
 
-    e = geraPrimo(8)
+    e = random.randint(0, pow(2,16))
     while math.gcd(e, (p-1)*(q-1)) != 1:
-        e = geraPrimo(16)
+        e = random.randint(0, pow(2,16))
 
     return (e, p, q)
 
 def chavePrivada(e, p, q):
     d = extendedEuclidean(e, (p-1)*(q-1))[1]
-    #if d < 0:
-    #    d = d % ((p-1)*(q-1))
+    if d < 1:
+        print('burro')
+        d = d + ((p-1)*(q-1))
+    print(d)
 
-    return (d, p * q)
+    return (int(d), p * q)
 
 def criptografa(mensagem, e, n):
     cript = []
@@ -56,13 +61,27 @@ def criptografa(mensagem, e, n):
 def descriptografa(mensagem, d, n):
     decript = []
     for i in mensagem:
-        decript.append(pow(i, d, n))
+        #print(pow(i, d, n))
+        decript.append(chr(pow(i, d, n)))
 
     return decript
 
-#print(chavePrivada(17, 11, 13))
-e, p, q = chavePublica(32)
-d, n = chavePrivada(e, p, q)
+def quebra_forcabruta(n, bits):
+    bits += 1
+    for p in range(pow(2,bits)):
+        if fermatPrimalityTest(p):
+            for q in range(pow(2,bits)):
+                if fermatPrimalityTest(q) and p * q == n:
+                    return (p,q)
 
-a = criptografa("abacate", e, n)
+bits = 16
+msg = open("mensagem.csv")
+
+e, p, q = chavePublica(bits)
+
+d, n = chavePrivada(e, p, q)
+a = criptografa(msg.read(), e, n)
 print(descriptografa(a, d, n))
+
+print((p,q))
+print(quebra_forcabruta(n, bits))
